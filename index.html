@@ -2,32 +2,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>API Key Validator</title>
+    <title>legal memo-maker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-100 font-roboto">
+<body class="bg-gray-900 text-white font-roboto">
     <div class="min-h-screen flex flex-col items-center justify-center">
-        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-            <h1 class="text-2xl font-bold mb-6 text-center">API Key Validator</h1>
+        <div class="bg-gray-800 p-8 rounded-lg shadow-lg w-full max-w-md">
+            <h1 class="text-2xl font-bold mb-6 text-center">legal memo-maker</h1>
             <form id="apiKeyForm" class="space-y-4">
                 <div>
-                    <label for="apiKey" class="block text-sm font-medium text-gray-700">API Key</label>
-                    <input type="text" id="apiKey" name="apiKey" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Enter your API key">
+                    <label for="apiKey" class="block text-sm font-medium text-gray-300">api key</label>
+                    <input type="text" id="apiKey" name="apiKey" class="mt-1 block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-gray-700 text-white" placeholder="open router key">
                 </div>
                 <div>
-                    <label for="model" class="block text-sm font-medium text-gray-700">Model</label>
-                    <select id="model" name="model" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                        <option value="openai/gpt-4o-mini">openai/gpt-4o-mini</option>
-                        <option value="perplexity/llama-3.1-sonar-small-128k-online">perplexity/sonar-138k</option>
-                    </select>
+                    <label for="model" class="block text-sm font-medium text-gray-300">ai model</label>
+                    <select id="model" name="model" class="mt-1 block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-gray-700 text-white">                        
+                        <option value="perplexity/llama-3.1-sonar-small-128k-online">sonar-138k-online(perplexity ai)</option>                       
+                   </select>
                 </div>
                 <div>
-                    <label for="subject" class="block text-sm font-medium text-gray-700">Subject</label>
-                    <input type="text" id="subject" name="subject" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Enter the subject of the memorandum">
+                    <label for="subject" class="block text-sm font-medium text-gray-300">memo ingredients</label>
+                    <input type="text" id="subject" name="subject" class="mt-1 block w-full px-3 py-2 border border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm bg-gray-700 text-white" placeholder="insert legal ideas(s) here">
                 </div>
-                <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Validate Key</button>
+                <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">go</button>
             </form>
             <div id="result" class="mt-6 text-center"></div>
         </div>
@@ -61,11 +60,11 @@
 
 5. section iv. analysis & options – detail at least three options (e.g., option 1, option 2, option 3). for each option include 'advantages' and 'disadvantages' using markdown bullet points and formatting such as:
    
-   **option 1: [name]**  
-   - *advantages*:  
+   option 1: [name]  
+    - advantages:  
      - [advantage 1]  
      - [advantage 2]  
-   - *disadvantages*:  
+   -  disadvantages:  
      - [disadvantage 1]  
      - [disadvantage 2]
 
@@ -112,9 +111,22 @@ ensure the entire output is in all-lower-case and formatted exactly as shown, wi
                 const data = await response.json();
                 const answer = data.choices[0].message.content;
 
-                resultDiv.innerHTML = `<p class="text-green-600 font-bold">API Key is valid!</p><pre class="mt-4 text-left whitespace-pre-wrap">${answer}</pre>`;
+                resultDiv.innerHTML = `
+                    <div class="relative">
+                        <button id="copyButton" class="absolute right-2 top-2 bg-indigo-600 text-white py-1 px-2 rounded-md hover:bg-indigo-700 focus:outline-none">Copy</button>
+                        <p class="text-green-400 font-bold">key validation complete</p>
+                        <pre id="output" class="mt-4 text-left whitespace-pre-wrap bg-gray-700 p-4 rounded-md">${answer}</pre>
+                    </div>
+                `;
+
+                document.getElementById('copyButton').addEventListener('click', function() {
+                    const outputText = document.getElementById('output').innerText;
+                    navigator.clipboard.writeText(outputText).then(() => {
+                        alert('Output copied to clipboard!');
+                    });
+                });
             } catch (error) {
-                resultDiv.innerHTML = `<p class="text-red-600 font-bold">${error.message}</p>`;
+                resultDiv.innerHTML = `<p class="text-red-400 font-bold">${error.message}</p>`;
             }
         });
     </script>
