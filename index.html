@@ -1,0 +1,122 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Key Validator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-100 font-roboto">
+    <div class="min-h-screen flex flex-col items-center justify-center">
+        <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+            <h1 class="text-2xl font-bold mb-6 text-center">API Key Validator</h1>
+            <form id="apiKeyForm" class="space-y-4">
+                <div>
+                    <label for="apiKey" class="block text-sm font-medium text-gray-700">API Key</label>
+                    <input type="text" id="apiKey" name="apiKey" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Enter your API key">
+                </div>
+                <div>
+                    <label for="model" class="block text-sm font-medium text-gray-700">Model</label>
+                    <select id="model" name="model" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <option value="openai/gpt-4o-mini">openai/gpt-4o-mini</option>
+                        <option value="perplexity/llama-3.1-sonar-small-128k-online">perplexity/sonar-138k</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="subject" class="block text-sm font-medium text-gray-700">Subject</label>
+                    <input type="text" id="subject" name="subject" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Enter the subject of the memorandum">
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Validate Key</button>
+            </form>
+            <div id="result" class="mt-6 text-center"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('apiKeyForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const apiKey = document.getElementById('apiKey').value;
+            const model = document.getElementById('model').value;
+            const subject = document.getElementById('subject').value || 'placeholder subject';
+            const resultDiv = document.getElementById('result');
+
+            const prompt = `act as a legal assistant and produce a memorandum output using all-lower-case markdown formatting exactly as follows. the memorandum should be addressed to 'dno' and from 'ai-n.' include the following sections with clearly labeled headings:
+
+1. a header block with:
+   ──────────────────────────────  
+   memorandum  
+   ──────────────────────────────  
+   to: dno  
+   from: ai-n  
+   date: [insert current date]  
+   re: ${subject}  
+   ──────────────────────────────  
+
+2. section i. introduction – provide a concise overview of the purpose and context.
+
+3. section ii. factual background – list all relevant facts as bullet points.
+
+4. section iii. issues presented – enumerate the key issues that need addressing.
+
+5. section iv. analysis & options – detail at least three options (e.g., option 1, option 2, option 3). for each option include 'advantages' and 'disadvantages' using markdown bullet points and formatting such as:
+   
+   **option 1: [name]**  
+   - *advantages*:  
+     - [advantage 1]  
+     - [advantage 2]  
+   - *disadvantages*:  
+     - [disadvantage 1]  
+     - [disadvantage 2]
+
+6. section v. recommendation – state your recommended option, explaining why it best meets the objectives.
+
+7. section vi. conclusion – succinctly summarize your findings and next steps.
+
+8. a disclaimer section that reads:  
+   
+   disclaimer  
+   this memorandum is for educational purposes only. although i was a lawyer, i am not your lawyer. no legal advice is provided herein.
+
+9. the closing should state:  
+   
+   respectfully,  
+   ai-n  
+
+ensure the entire output is in all-lower-case and formatted exactly as shown, with clear section dividers (using lines of '──────────────────────────────'). respond as if this is an actual memorandum with realistic content based on the subject provided in the 're:' line. if no subject is given, you may use a placeholder subject.`;
+
+            resultDiv.innerHTML = '<i class="fas fa-spinner fa-spin text-indigo-600"></i> Validating...';
+
+            try {
+                const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: model,
+                        messages: [
+                            {
+                                role: 'user',
+                                content: prompt
+                            }
+                        ]
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Invalid API Key');
+                }
+
+                const data = await response.json();
+                const answer = data.choices[0].message.content;
+
+                resultDiv.innerHTML = `<p class="text-green-600 font-bold">API Key is valid!</p><pre class="mt-4 text-left whitespace-pre-wrap">${answer}</pre>`;
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="text-red-600 font-bold">${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
